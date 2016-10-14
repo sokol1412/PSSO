@@ -28,9 +28,9 @@ public class CipherPackerTest {
 
 	@Test
 	public void testPacker() throws Exception {
-		out = new PackerOutputStream(new FileOutputStream("src/main/resources/compressedText.txt"));
+		//out = new PackerOutputStream(new FileOutputStream("src/main/resources/compressedText.txt"));
 		copyAndClose(in, out, 64);
-		in = new UnpackerInputStream(new FileInputStream("src/main/resources/compressedText.txt"));
+		//in = new UnpackerInputStream(new FileInputStream("src/main/resources/compressedText.txt"));
 		out = new FileOutputStream("src/main/resources/out.txt");
 		copyAndClose(in, out, 32);
 		assertEquals(Files.size(Paths.get("src/main/resources/plainText.txt")),
@@ -49,11 +49,11 @@ public class CipherPackerTest {
 
 	@Test
 	public void testCipherAndPacker() throws Exception {
-		out = new PackerOutputStream(
-				new CipherOutputStream(new FileOutputStream("src/main/resources/encryptedCompressedText.txt")));
+		//out = new PackerOutputStream(
+		//		new CipherOutputStream(new FileOutputStream("src/main/resources/encryptedCompressedText.txt")));
 		copyAndClose(in, out, 32);
-		in = new UnpackerInputStream(
-				new CipherInputStream(new FileInputStream("src/main/resources/encryptedCompressedText.txt")));
+		//in = new UnpackerInputStream(
+		//		new CipherInputStream(new FileInputStream("src/main/resources/encryptedCompressedText.txt")));
 		out = new FileOutputStream("src/main/resources/out.txt");
 		copyAndClose(in, out, 64);
 		assertEquals(Files.size(Paths.get("src/main/resources/plainText.txt")),
