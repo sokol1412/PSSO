@@ -4,16 +4,24 @@ import java.io.*;
 
 public class PackerOutputStream extends FilterOutputStream {
 
-	private FileOutputStream outputStream;
-	private FileInputStream inputStream;
+	int bit;
 
-	public PackerOutputStream(FileInputStream in, FileOutputStream out) {
+	public PackerOutputStream(FileOutputStream out) {
 		super(out);
-		inputStream = in;
-		outputStream = out;
 	}
 
-	public void encode(int bit) {
+	public void setBit(int b) {
+		this.bit = b;
+	}
+
+	@Override
+	public void write(byte[] b) {
+		FileInputStream inputStream = null;
+		try {
+			inputStream = new FileInputStream("src/zad2/resources/plainText.txt");
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
 		String text = "";
 		int content;
 		try {
@@ -26,10 +34,10 @@ public class PackerOutputStream extends FilterOutputStream {
 
 		int length = text.length();
 		float tmpRet1 = 0, tmpRet2 = 0;
-		if (bit == Constants.SIX_BIT) {
+		if (bit == Conf.SIX_BIT) {
 			tmpRet1 = 3.0f;
 			tmpRet2 = 4.0f;
-		} else if (bit == Constants.FIVE_BIT) {
+		} else if (bit == Conf.FIVE_BIT) {
 			tmpRet1 = 5.0f;
 			tmpRet2 = 8.0f;
 		}
@@ -54,13 +62,12 @@ public class PackerOutputStream extends FilterOutputStream {
 			encoded[i / 8] = tempInt.byteValue();
 		}
 		try {
-			outputStream.write(encoded);
-			outputStream.flush();
-			outputStream.close();
-		} catch (IOException e) {
+			super.write(encoded);
+			flush();
+			close();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	int toValue(char ch) {

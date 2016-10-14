@@ -11,12 +11,15 @@ public class Test {
 		PackerOutputStream packer = null;
 		UnpackerInputStream unPacker = null;
 		try {
-			 packer = new PackerOutputStream(new FileInputStream("src/zad2/resources/plainText.txt"), new FileOutputStream("src/zad2/resources/compressedText.txt"));
-			 unPacker = new UnpackerInputStream(new FileInputStream("src/zad2/resources/compressedText.txt"), new FileOutputStream("src/zad2/resources/unCompressedText.txt"));
+			 String compressedFileName = "src/zad2/resources/compressedText.txt";
+			 packer = new PackerOutputStream(new FileOutputStream(compressedFileName));
+			 unPacker = new UnpackerInputStream(new FileInputStream(compressedFileName));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		packer.encode(Constants.SIX_BIT);
-		unPacker.decode(new File("src/zad2/resources/compressedText.txt"), Constants.SIX_BIT);
+		packer.setBit(Conf.SIX_BIT);
+		packer.write(null);
+		unPacker.setBit(Conf.SIX_BIT);
+		unPacker.read();
 	}
 }

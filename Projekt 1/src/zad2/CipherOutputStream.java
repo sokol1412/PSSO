@@ -4,10 +4,12 @@ import java.io.*;
 
 public class CipherOutputStream extends FilterOutputStream {
 
-	public CipherOutputStream(OutputStream arg0) {
-		super(arg0);
+	public CipherOutputStream(FileOutputStream out) {
+		super(out);
 		// TODO Auto-generated constructor stub
 	}
+
+	
 
 
 }

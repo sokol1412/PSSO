@@ -4,20 +4,31 @@ import java.io.*;
 
 public class UnpackerInputStream extends FilterInputStream {
 
-	private FileOutputStream outputStream;
-	private FileInputStream inputStream;
+	File fileToDecode;
+	int bit;
 
-	protected UnpackerInputStream(FileInputStream in, FileOutputStream out) {
+	UnpackerInputStream(FileInputStream in) {
 		super(in);
-		inputStream = in;
-		outputStream = out;
 	}
 
-	void decode(File fileToDecode, int bit) {
+	public void setBit(int b) {
+		this.bit = b;
+	}
+
+	@Override
+	public int read() {
+		File fileToDecode = new File("src/zad2/resources/compressedText.txt");
+		String trimmedString = "";
+		FileOutputStream outputStream = null;
+		try {
+			outputStream = new FileOutputStream("src/zad2/resources/uncompressedText.txt");
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
 		byte encoded[] = new byte[(int) fileToDecode.length()];
 		try {
-			in.read(encoded);
-			in.close();
+			super.read(encoded);
+			close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -42,13 +53,17 @@ public class UnpackerInputStream extends FilterInputStream {
 			tempInt = tempInt.valueOf(strBinary.substring(i, i + bit), 2);
 			strText = strText + toChar(tempInt.intValue());
 		}
+
 		try {
-			outputStream.write(strText.getBytes());
+			// remove unnecessary spaces from the end of the string
+			trimmedString = strText.replaceAll("\\s+$", "");
+			outputStream.write(trimmedString.getBytes());
 			outputStream.flush();
 			outputStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return trimmedString.getBytes().length;
 	}
 
 	char toChar(int val) {
