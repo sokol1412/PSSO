@@ -23,7 +23,7 @@ public class Client {
             System.out.println("");
             EvaluateVisitor evaluate = new EvaluateVisitor();
             rootNode.accept(evaluate);
-            System.out.println(evaluate.getValue());
+            System.out.println("result: " + evaluate.getValue());
             
 	}
 }

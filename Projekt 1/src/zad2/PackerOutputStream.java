@@ -4,14 +4,12 @@ import java.io.*;
 
 public class PackerOutputStream extends FilterOutputStream {
 
-	int bit;
-
 	public PackerOutputStream(FileOutputStream out) {
 		super(out);
 	}
 
-	public void setBit(int b) {
-		this.bit = b;
+	public PackerOutputStream(CipherOutputStream out) {
+		super(out);
 	}
 
 	@Override
@@ -34,13 +32,8 @@ public class PackerOutputStream extends FilterOutputStream {
 
 		int length = text.length();
 		float tmpRet1 = 0, tmpRet2 = 0;
-		if (bit == Conf.SIX_BIT) {
-			tmpRet1 = 3.0f;
-			tmpRet2 = 4.0f;
-		} else if (bit == Conf.FIVE_BIT) {
-			tmpRet1 = 5.0f;
-			tmpRet2 = 8.0f;
-		}
+		tmpRet1 = 3.0f;
+		tmpRet2 = 4.0f;
 		byte encoded[] = new byte[(int) (tmpRet1 * Math.ceil(length / tmpRet2))];
 		char str[] = new char[length];
 		text.getChars(0, length, str, 0);
@@ -48,7 +41,7 @@ public class PackerOutputStream extends FilterOutputStream {
 		String strBinary = "";
 		for (int i = 0; i < length; i++) {
 			temp = Integer.toBinaryString(toValue(str[i]));
-			while (temp.length() % bit != 0) {
+			while (temp.length() % 6 != 0) {
 				temp = "0" + temp;
 			}
 			strBinary = strBinary + temp;

@@ -1,27 +1,46 @@
 package zad2;
 
 import java.io.*;
+import java.lang.reflect.Field;
 
 public class UnpackerInputStream extends FilterInputStream {
 
-	File fileToDecode;
-	int bit;
+	String fileToDecodePath;
 
 	UnpackerInputStream(FileInputStream in) {
 		super(in);
+		// workaround for getting filename from FileOutputStream
+		Field pathField;
+		try {
+			pathField = FileInputStream.class.getDeclaredField("path");
+			pathField.setAccessible(true);
+			String path;
+			try {
+				path = (String) pathField.get(in);
+				this.fileToDecodePath = path;
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void setBit(int b) {
-		this.bit = b;
+	UnpackerInputStream(CipherInputStream in)
+	{
+		super(in);
 	}
-
 	@Override
 	public int read() {
-		File fileToDecode = new File("src/zad2/resources/compressedText.txt");
+		File fileToDecode = new File(fileToDecodePath);
 		String trimmedString = "";
 		FileOutputStream outputStream = null;
 		try {
-			outputStream = new FileOutputStream("src/zad2/resources/uncompressedText.txt");
+			outputStream = new FileOutputStream("src/zad2/resources/out.txt");
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		}
@@ -49,8 +68,8 @@ public class UnpackerInputStream extends FilterInputStream {
 			}
 			strBinary = strBinary + strTemp;
 		}
-		for (int i = 0; i < strBinary.length(); i = i + bit) {
-			tempInt = tempInt.valueOf(strBinary.substring(i, i + bit), 2);
+		for (int i = 0; i < strBinary.length(); i = i + 6) {
+			tempInt = tempInt.valueOf(strBinary.substring(i, i + 6), 2);
 			strText = strText + toChar(tempInt.intValue());
 		}
 
@@ -63,7 +82,7 @@ public class UnpackerInputStream extends FilterInputStream {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return trimmedString.getBytes().length;
+		return 0;
 	}
 
 	char toChar(int val) {
