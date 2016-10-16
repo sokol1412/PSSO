@@ -47,7 +47,6 @@ public class Parser {
   private void PopConnectPush() {
      TreeNode right = treeStack.pop();
      TreeNode left = treeStack.pop();
-     //BinaryTreeNode tree = new BinaryTreeNode(operatorStack.pop(), left, right);
      BinaryOperatorNode tree;
     String operator = operatorStack.pop();
     switch(operator){

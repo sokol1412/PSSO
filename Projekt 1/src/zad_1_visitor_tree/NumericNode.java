@@ -14,7 +14,7 @@ public class NumericNode implements TreeNode{
     
     @Override
     public String getLabel() {
-        return String.valueOf(this.value); // YOLO
+        return String.valueOf(this.value);
     }
 
     @Override

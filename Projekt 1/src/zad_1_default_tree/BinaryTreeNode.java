@@ -15,8 +15,7 @@ public class BinaryTreeNode extends TreeNode {
 	}
 
 	public Boolean isOperatorWithLessPriority() {
-		if (label.equals("+") || label.equals("-")) // || label.equals("*") ||
-													// label.equals("/") )
+		if (label.equals("+") || label.equals("-"))
 			return true;
 		else
 			return false;
@@ -77,8 +76,6 @@ public class BinaryTreeNode extends TreeNode {
 
 	public int evaluate() {
 		int result = 0;
-		// System.out.println("left: "+left.label+" my: "+label+" right:
-		// "+right.label);
 		if (this.left.isOperator())
 			left.evaluate();
 		if (this.right.isOperator())
