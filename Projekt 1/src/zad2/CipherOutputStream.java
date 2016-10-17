@@ -1,21 +1,24 @@
 package zad2;
 
+
 import java.io.*;
 
 public class CipherOutputStream extends FilterOutputStream {
 
-	String key = null;
-	byte[] K_BOX = new byte[256];
-	byte[] S_BOX = new byte[256];
-	byte[] keyStream = null;
+	String key;
+	// variables needed for proper keystream generation
+	byte[] K_BOX;
+	byte[] S_BOX;
+	int i;
+	int j;
 
-	public byte[] getKeyStream() {
-		return this.keyStream;
-	}
-
-	public CipherOutputStream(OutputStream out) {
-		super(out);
+	public CipherOutputStream(OutputStream outStream) {
+		super(outStream);
+		this.i = 0;
+		this.j = 0;
 		this.key = "abcdefghijklmnop";
+		K_BOX = new byte[256];
+		S_BOX = new byte[256];
 		for (int i = 0; i < S_BOX.length; i++)
 			S_BOX[i] = (byte) i;
 
@@ -24,9 +27,9 @@ public class CipherOutputStream extends FilterOutputStream {
 		}
 		scramble();
 	}
-	
-	public CipherOutputStream(OutputStream out, String key) {
-		super(out);
+
+	public CipherOutputStream(OutputStream outStream, String key) {
+		super(outStream);
 		this.key = key;
 		for (int i = 0; i < S_BOX.length; i++)
 			S_BOX[i] = (byte) i;
@@ -54,38 +57,18 @@ public class CipherOutputStream extends FilterOutputStream {
 		}
 	}
 
-	private byte[] xorWithKey(byte[] message, byte[] key) {
-		byte[] encryptedText = new byte[key.length];
-		for (int i = 0; i < key.length; i++) {
-			encryptedText[i] = (byte) (message[i] ^ key[i]);
-		}
-		return encryptedText;
-	}
+//	private byte[] xorWithKey(byte[] message, byte[] key) {
+//		byte[] encryptedText = new byte[key.length];
+//		for (int i = 0; i < key.length; i++) {
+//			encryptedText[i] = (byte) (message[i] ^ key[i]);
+//		}
+//		return encryptedText;
+//	}
 
-	@Override
-	public void write(byte[] b) {
-		byte[] encryptedText = null;
-		FileInputStream inputStream = null;
-		try {
-			inputStream = new FileInputStream("src/zad2/resources/plainText.txt");
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		String text = "";
-		int content;
-		try {
-			while ((content = inputStream.read()) != -1) {
-				text += ((char) content);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		int i = 0;
-		int j = 0;
+	private byte[] encryptData(byte[] msg, int len) {
 		byte temp;
-		keyStream = new byte[text.length()];
-		for (int k = 0; k < text.length(); k++) {
+		byte[] encryptedText = new byte[len];
+		for (int k = 0; k < len; k++) {
 			i = (i + 1) % 256;
 			j = (j + 1) % 256;
 			temp = S_BOX[i];
@@ -97,17 +80,19 @@ public class CipherOutputStream extends FilterOutputStream {
 				temp1 += 256;
 			if (temp2 < 0)
 				temp2 += 256;
-			keyStream[k] = S_BOX[(temp1 + temp2) % 256];
+			byte keyStream = S_BOX[(temp1 + temp2) % 256];
+			encryptedText[k] = (byte) (msg[k] ^ keyStream);
 		}
+		return encryptedText;
+	}
 
-		encryptedText = xorWithKey(text.getBytes(), keyStream);
+	@Override
+	public void write(byte b[], int off, int len) {
+		byte[] bytes = encryptData(b, len);
 		try {
-			super.write(encryptedText);
-			flush();
-			close();
-		} catch (Exception e) {
+			super.write(bytes, off, bytes.length);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
 }

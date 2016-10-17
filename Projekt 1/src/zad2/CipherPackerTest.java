@@ -23,44 +23,45 @@ public class CipherPackerTest {
 		// ClassLoader classLoader =
 		// Thread.currentThread().getContextClassLoader();
 		// in = classLoader.getResourceAsStream("plainText.txt");
-		in = new FileInputStream("src/zad2/resources/plainText.txt");
+		in = new FileInputStream("src/zad2/main/resources/plainText.txt");
 	}
 
 	@Test
 	public void testPacker() throws Exception {
-		out = new PackerOutputStream(new FileOutputStream("src/zad2/resources/compressedText.txt"));
+		out = new PackerOutputStream(new FileOutputStream("src/zad2/main/resources/compressedText.txt"));
 		copyAndClose(in, out, 64);
-		in = new UnpackerInputStream(new FileInputStream("src/zad2/resources/compressedText.txt"));
-		out = new FileOutputStream("src/zad2/resources/out.txt");
+		in = new UnpackerInputStream(new FileInputStream("src/zad2/main/resources/compressedText.txt"));
+		out = new FileOutputStream("src/zad2/main/resources/out.txt");
 		copyAndClose(in, out, 32);
-		assertEquals(Files.size(Paths.get("src/zad2/resources/plainText.txt")),
-				Files.size(Paths.get("src/zad2/resources/out.txt")));
+		assertEquals(Files.size(Paths.get("src/zad2/main/resources/plainText.txt")),
+				Files.size(Paths.get("src/zad2/main/resources/out.txt")));
 	}
 
 	@Test
 	public void testCipher() throws Exception {
-		out = new CipherOutputStream(new FileOutputStream("src/zad2/resources/encryptedText.txt"));
+		out = new CipherOutputStream(new FileOutputStream("src/zad2/main/resources/encryptedText.txt"));
 		copyAndClose(in, out, 64);
-		in = new CipherInputStream(new FileInputStream("src/zad2/resources/encryptedText.txt"));
-		out = new FileOutputStream("src/zad2/resources/out.txt");
+		in = new CipherInputStream(new FileInputStream("src/zad2/main/resources/encryptedText.txt"));
+		out = new FileOutputStream("src/zad2/main/resources/out.txt");
 		copyAndClose(in, out, 32);
 		assertTrue(contentEquals());
 	}
 
 	@Test
 	public void testCipherAndPacker() throws Exception {
-		out = new PackerOutputStream(
-				new CipherOutputStream(new FileOutputStream("src/zad2/resources/encryptedCompressedText.txt")));
+		out = new CipherOutputStream(
+				new PackerOutputStream(new FileOutputStream("src/zad2/main/resources/encryptedCompressedText.txt")));
 		copyAndClose(in, out, 32);
-		in = new UnpackerInputStream(
-				new CipherInputStream(new FileInputStream("src/zad2/resources/encryptedCompressedText.txt")));
-		out = new FileOutputStream("src/zad2/resources/out.txt");
+		in = new CipherInputStream(
+				new UnpackerInputStream(new FileInputStream("src/zad2/main/resources/encryptedCompressedText.txt")));
+		out = new FileOutputStream("src/zad2/main/resources/out.txt");
 		copyAndClose(in, out, 64);
-		assertEquals(Files.size(Paths.get("src/zad2/resources/plainText.txt")),
-				Files.size(Paths.get("src/zad2/resources/out.txt")));
+		assertEquals(Files.size(Paths.get("src/zad2/main/resources/plainText.txt")),
+				Files.size(Paths.get("src/zad2/main/resources/encryptedCompressedText.txt")));
 	}
 
 	private void copyAndClose(InputStream in, OutputStream out, int buffor) throws IOException {
+
 		byte[] array = new byte[buffor];
 		int count;
 		while ((count = in.read(array)) != -1) {
@@ -71,8 +72,8 @@ public class CipherPackerTest {
 	}
 
 	private boolean contentEquals() throws IOException {
-		InputStream in1 = new FileInputStream("src/zad2/resources/plainText.txt");
-		InputStream in2 = new FileInputStream("src/zad2/resources/out.txt");
+		InputStream in1 = new FileInputStream("src/zad2/main/resources/plainText.txt");
+		InputStream in2 = new FileInputStream("src/zad2/main/resources/out.txt");
 		boolean result = true;
 		int ch1, ch2;
 		while ((ch1 = in1.read()) != -1) {

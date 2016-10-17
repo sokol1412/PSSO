@@ -1,23 +1,34 @@
 package zad2;
 
+
 import java.io.*;
 import java.lang.reflect.Field;
 
 public class UnpackerInputStream extends FilterInputStream {
 
-	String fileToDecodePath;
+	byte[] bytes;
+	byte[] buffor;
+	int index;
+	int bufforSize;
+	String fileStreamPath;
 
-	UnpackerInputStream(FileInputStream in) {
-		super(in);
-		// workaround for getting filename from FileOutputStream
+	UnpackerInputStream(InputStream inputStream) {
+		super(inputStream);
+		this.index = 0;
+		this.bufforSize = 1;
+	}
+
+	@SuppressWarnings("unused")
+	private void getFileNameFromStream() {
+		// workaround for getting filename from inputstream
 		Field pathField;
 		try {
-			pathField = FileInputStream.class.getDeclaredField("path");
+			pathField = InputStream.class.getDeclaredField("path");
 			pathField.setAccessible(true);
 			String path;
 			try {
 				path = (String) pathField.get(in);
-				this.fileToDecodePath = path;
+				this.fileStreamPath = path;
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
@@ -30,59 +41,59 @@ public class UnpackerInputStream extends FilterInputStream {
 		}
 	}
 
-	UnpackerInputStream(CipherInputStream in)
-	{
-		super(in);
-	}
 	@Override
-	public int read() {
-		File fileToDecode = new File(fileToDecodePath);
-		String trimmedString = "";
-		FileOutputStream outputStream = null;
-		try {
-			outputStream = new FileOutputStream("src/zad2/resources/out.txt");
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		byte encoded[] = new byte[(int) fileToDecode.length()];
-		try {
-			super.read(encoded);
-			close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public int read(byte b[]) {
+		if (index < bufforSize) {
+			if (index == 0) {
+				byte[] wholeBuffor = new byte[10000];
+				int size = 0;
+				try {
+					size = super.read(wholeBuffor);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				byte[] encoded = new byte[size];
+				for (int i = 0; i < size; i++) {
+					encoded[i] = wholeBuffor[i];
+				}
+				String strTemp = new String("");
+				String strBinary = new String("");
+				String strText = new String("");
+				Integer tempInt = new Integer(0);
+				int intTemp = 0;
+				for (int i = 0; i < encoded.length; i++) {
+					if (encoded[i] < 0) {
+						intTemp = (int) encoded[i] + 256;
+					} else {
+						intTemp = (int) encoded[i];
+					}
+					strTemp = Integer.toBinaryString(intTemp);
+					while (strTemp.length() % 8 != 0) {
+						strTemp = "0" + strTemp;
+					}
+					strBinary = strBinary + strTemp;
+				}
+				for (int i = 0; i < strBinary.length(); i = i + 6) {
+					tempInt = tempInt.valueOf(strBinary.substring(i, i + 6), 2);
+					strText = strText + toChar(tempInt.intValue());
+				}
+				strText = strText.trim();
 
-		String strTemp = "";
-		String strBinary = "";
-		String strText = "";
-		Integer tempInt = new Integer(0);
-		int intTemp = 0;
-		for (int i = 0; i < encoded.length; i++) {
-			if (encoded[i] < 0) {
-				intTemp = (int) encoded[i] + 256;
-			} else
-				intTemp = (int) encoded[i];
-			strTemp = Integer.toBinaryString(intTemp);
-			while (strTemp.length() % 8 != 0) {
-				strTemp = "0" + strTemp;
+				buffor = strText.getBytes();
+				bufforSize = buffor.length;
 			}
-			strBinary = strBinary + strTemp;
+			int len;
+			if (index + b.length > bufforSize) {
+				len = bufforSize - index;
+			} else {
+				len = b.length;
+			}
+			for (int i = 0; i < len; i++) {
+				b[i] = buffor[index++];
+			}
+			return len;
 		}
-		for (int i = 0; i < strBinary.length(); i = i + 6) {
-			tempInt = tempInt.valueOf(strBinary.substring(i, i + 6), 2);
-			strText = strText + toChar(tempInt.intValue());
-		}
-
-		try {
-			// remove unnecessary spaces from the end of the string
-			trimmedString = strText.replaceAll("\\s+$", "");
-			outputStream.write(trimmedString.getBytes());
-			outputStream.flush();
-			outputStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return 0;
+		return -1;
 	}
 
 	char toChar(int val) {
@@ -272,13 +283,13 @@ public class UnpackerInputStream extends FilterInputStream {
 			ch = '6';
 			break;
 		case 61:
-			ch = '9';
-			break;
-		case 62:
 			ch = '[';
 			break;
-		case 63:
+		case 62:
 			ch = ']';
+			break;
+		case 63:
+			ch = '9';
 			break;
 		default:
 			ch = ' ';

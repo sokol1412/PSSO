@@ -1,68 +1,40 @@
 package zad2;
 
+
+
+
+import static org.junit.Assert.assertTrue;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Test {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        InputStream in = null;
+        OutputStream out = null;
 
-		// // packer/unpacker
-		OutputStream packer = null;
-		InputStream unPacker = null;
-		try {
-			String compressedFileName = "src/zad2/resources/compressedText.txt";
-			packer = new PackerOutputStream(new FileOutputStream(compressedFileName));
-			unPacker = new UnpackerInputStream(new FileInputStream(compressedFileName));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		try {
-			packer.write(null);
-			unPacker.read();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    	in = new FileInputStream("src/zad2/main/resources/plainText.txt");
+        out = new CipherOutputStream(new FileOutputStream("src/zad2/main/resources/encryptedText.txt"));
+		copyAndClose(in, out, 64);
+		in = new CipherInputStream(new FileInputStream("src/zad2/main/resources/encryptedText.txt"));
+		out = new FileOutputStream("src/zad2/main/resources/out.txt");
+		copyAndClose(in, out, 32);
+    }
 
-		System.out.println("Packing and unpacking completed!");
-
-		// cipher/decipher - jesli chcialbym zamienic ponizsze streamy na Zwykly
-		// InputStream i OutputStream, to jak handleowac przekazywanie
-		// KeyStreama??
-//		CipherOutputStream cipher = null;
-//		CipherInputStream deCipher = null;
-//		try {
-//			String encryptedFileName = "src/zad2/resources/encryptedText.txt";
-//			cipher = new CipherOutputStream(new FileOutputStream(encryptedFileName),
-//					"askl;dasdkl;akls;daskdl;asdkl;asdkl;aaa");
-//			deCipher = new CipherInputStream(new FileInputStream(encryptedFileName));
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
-//		cipher.write(null);
-//		byte[] keyStream = cipher.getKeyStream();
-//		deCipher.setKeyStream(keyStream);
-//		deCipher.read();
-//		System.out.println("Encrypting and decrypting completed!");
-
-		// // encryption and packing together
-		// OutputStream out = null;
-		// InputStream in = null;
-		// try {
-		// String testedFileName =
-		// "src/zad2/resources/encryptedCompressedText.txt";
-		// out = new PackerOutputStream(
-		// new CipherOutputStream(new FileOutputStream(testedFileName),
-		// "lkasdklasdklklasdadksl"));
-		// in = new UnpackerInputStream(new CipherInputStream(new
-		// FileInputStream(testedFileName)));
-		// } catch (FileNotFoundException e) {
-		// e.printStackTrace();
-		// }
-
-	}
+    private static void copyAndClose(InputStream in, OutputStream out, int buffor) throws IOException {
+        byte[] array = new byte[buffor];
+        int count;
+        while ((count = in.read(array)) != -1) {
+            out.write(array, 0, count);
+        }
+        in.close();
+        out.close();
+    }
 }

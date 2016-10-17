@@ -1,46 +1,33 @@
 package zad2;
 
+
 import java.io.*;
+import java.util.Arrays;
 
 public class PackerOutputStream extends FilterOutputStream {
 
-	public PackerOutputStream(FileOutputStream out) {
-		super(out);
-	}
 
-	public PackerOutputStream(CipherOutputStream out) {
-		super(out);
+	PackerOutputStream(OutputStream outputStream) {
+		super(outputStream);
 	}
 
 	@Override
-	public void write(byte[] b) {
-		FileInputStream inputStream = null;
-		try {
-			inputStream = new FileInputStream("src/zad2/resources/plainText.txt");
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		String text = "";
-		int content;
-		try {
-			while ((content = inputStream.read()) != -1) {
-				text += ((char) content);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void write(byte[] bytes, int off, int len) {
+		String str = new String(bytes);
+		if (str.indexOf('\0') > 0)
+			str = str.substring(0, str.indexOf('\0'));
 
-		int length = text.length();
+		int length = str.length();
 		float tmpRet1 = 0, tmpRet2 = 0;
 		tmpRet1 = 3.0f;
 		tmpRet2 = 4.0f;
 		byte encoded[] = new byte[(int) (tmpRet1 * Math.ceil(length / tmpRet2))];
-		char str[] = new char[length];
-		text.getChars(0, length, str, 0);
+		char string[] = new char[length];
+		str.getChars(0, length, string, 0);
 		String temp;
-		String strBinary = "";
+		String strBinary = new String("");
 		for (int i = 0; i < length; i++) {
-			temp = Integer.toBinaryString(toValue(str[i]));
+			temp = Integer.toBinaryString(toValue(string[i]));
 			while (temp.length() % 6 != 0) {
 				temp = "0" + temp;
 			}
@@ -55,12 +42,11 @@ public class PackerOutputStream extends FilterOutputStream {
 			encoded[i / 8] = tempInt.byteValue();
 		}
 		try {
-			super.write(encoded);
-			flush();
-			close();
-		} catch (Exception e) {
+			super.write(encoded, off, encoded.length);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Arrays.fill(bytes, (byte) '\0');
 	}
 
 	int toValue(char ch) {
@@ -249,13 +235,13 @@ public class PackerOutputStream extends FilterOutputStream {
 		case '6':
 			chaVal = 60;
 			break;
-		case '9':
+		case '[':
 			chaVal = 61;
 			break;
-		case '[':
+		case ']':
 			chaVal = 62;
 			break;
-		case ']':
+		case '9':
 			chaVal = 63;
 			break;
 		default:

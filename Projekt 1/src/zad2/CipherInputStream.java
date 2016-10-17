@@ -1,73 +1,88 @@
 package zad2;
 
+
 import java.io.*;
-import java.lang.reflect.Field;
 
 public class CipherInputStream extends FilterInputStream {
 
-	byte[] keyStream;
-	String fileToDecodePath;
+	String key = null;
+	// variables needed for proper keystream generation
+	byte[] K_BOX;
+	byte[] S_BOX;
+	int i;
+	int j;
 
-	protected CipherInputStream(InputStream in) {
-		super(in);
-		// workaround for getting filename from FileOutputStream
-		Field pathField;
-		try {
-			pathField = FileInputStream.class.getDeclaredField("path");
-			pathField.setAccessible(true);
-			String path;
-			try {
-				path = (String) pathField.get(in);
-				this.fileToDecodePath = path;
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		} catch (NoSuchFieldException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
+	CipherInputStream(InputStream inputStream) {
+		super(inputStream);
+		this.i = 0;
+		this.j = 0;
+		K_BOX = new byte[256];
+		S_BOX = new byte[256];
+		this.key = "abcdefghijklmnop";
+		for (int i = 0; i < S_BOX.length; i++)
+			S_BOX[i] = (byte) i;
+
+		for (int i = 0; i < K_BOX.length; i++) {
+			K_BOX[i] = (byte) key.charAt(i % key.length());
+		}
+		scramble();
+	}
+
+	public CipherInputStream(InputStream inStream, String key) {
+		super(inStream);
+		this.key = key;
+		for (int i = 0; i < S_BOX.length; i++)
+			S_BOX[i] = (byte) i;
+
+		for (int i = 0; i < K_BOX.length; i++) {
+			K_BOX[i] = (byte) key.charAt(i % key.length());
+		}
+		scramble();
+	}
+
+	private void scramble() {
+		int j = 0;
+		byte temp;
+		for (int i = 0; i < S_BOX.length; i++) {
+			int temp1 = S_BOX[i] + 256;
+			int temp2 = K_BOX[i] + 256;
+			if (temp1 < 0)
+				temp1 += 256;
+			if (temp2 < 0)
+				temp2 += 256;
+			j = (j + temp1 + temp2) % 256;
+			temp = S_BOX[i];
+			S_BOX[i] = S_BOX[j];
+			S_BOX[j] = temp;
 		}
 	}
 
-	public void setKeyStream(byte[] key) {
-		this.keyStream = key;
-	}
-
-	private byte[] xorWithKey(byte[] message, byte[] key) {
-		byte[] decryptedText = new byte[key.length];
-		for (int i = 0; i < key.length; i++) {
-			decryptedText[i] = (byte) (message[i] ^ key[i]);
+	private void decrypt(byte[] msg, int len, byte[] result) {
+		byte temp;
+		for (int k = 0; k < len; k++) {
+			i = (i + 1) % 256;
+			j = (j + 1) % 256;
+			temp = S_BOX[i];
+			S_BOX[i] = S_BOX[j];
+			S_BOX[j] = temp;
+			int temp1 = S_BOX[i] + 256;
+			int temp2 = K_BOX[i] + 256;
+			if (temp1 < 0)
+				temp1 += 256;
+			if (temp2 < 0)
+				temp2 += 256;
+			byte keyStream = S_BOX[(temp1 + temp2) % 256];
+			result[k] = (byte) (msg[k] ^ keyStream);
 		}
-		return decryptedText;
 	}
 
 	@Override
-	public int read() {
-		byte[] decryptedText = null;
-		File fileToDecipher = new File(fileToDecodePath);
-		FileOutputStream outputStream = null;
-		try {
-			outputStream = new FileOutputStream("src/zad2/resources/out.txt");
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
+	public int read(byte b[], int off, int len) throws IOException {
+		byte[] bytes = new byte[len];
+		int result = super.read(bytes, 0, len);
+		if (result > 0) {
+			decrypt(bytes, result, b);
 		}
-		byte encoded[] = new byte[(int) fileToDecipher.length()];
-		try {
-			super.read(encoded);
-			close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		decryptedText = xorWithKey(encoded, keyStream);
-		try {
-			outputStream.write(decryptedText);
-			outputStream.flush();
-			outputStream.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return 0;
+		return result;
 	}
 }
