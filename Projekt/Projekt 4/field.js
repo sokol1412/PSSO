@@ -1,17 +1,16 @@
-myApp.factory('Pole', function() {
+maze_app.factory('Field', function() {
 	//private variables
 	this.x = null;
 	this.y = null;
-	this.droga = [];
+	this.path = [];
 
-	function Pole(x,y,s)
+	function Field(x,y,s)
     {
         this.x = x;
         this.y = y;
-        this.droga = [];
+        this.path = [];
         for (var i = 0; i < s.length; i++)
-            this.droga.push(s[i]);
+            this.path.push(s[i]);
     }
-
-	return Pole;
+	return Field;
 });
