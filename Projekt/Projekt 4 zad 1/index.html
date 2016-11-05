@@ -1,0 +1,23 @@
+<html ng-app="myApp">
+    <head>  
+        <link rel="stylesheet" href="app.css"/>
+    </head>
+    
+    <body ng-controller="BaseController" >
+        <div class="form-div">
+            <input ng-model="point.x" type="text" placeholer="Type x">
+            <input ng-model="point.y" type="text" placeholer="Type y">
+            <button ng-click="matrix.addItem(point);" id="addItem">Add</button>
+            <button ng-click="drawChart();">Draw</button>
+            <div class="list-points" ng-repeat="p in matrix.data1">
+                <p>{{p[0]}};{{p[1]}}</p>
+            </div>
+        </div>
+        <div id="chart_div"></div>
+    </body>
+    
+    <script src="bower_components/angular/angular.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['corechart']}]}"></script>
+    <script type="text/javascript" src="zad1.js"></script>
+    <script type="text/javascript" src="matrix.js"></script>
+</html>

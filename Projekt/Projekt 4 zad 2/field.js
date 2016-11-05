@@ -1,5 +1,4 @@
 maze_app.factory('Field', function() {
-	//private variables
 	this.x = null;
 	this.y = null;
 	this.path = [];

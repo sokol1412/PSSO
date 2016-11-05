@@ -1,5 +1,4 @@
 maze_app.factory('Maze', function(Queue, Field) {
-    //private variables
 
     function Maze() {
 		var Table = document.getElementById("Maze");
@@ -33,7 +32,7 @@ maze_app.factory('Maze', function(Queue, Field) {
     Maze.prototype.solveMaze = function() {
         notChecked = new Queue();
         notChecked.pushBack(new Field(0, 0, []));
-
+		//var stepsCounter = 0;
         while (true) {
             var field = notChecked.pop();
             if (field.x == 9 && field.y == 9) {
@@ -78,7 +77,9 @@ maze_app.factory('Maze', function(Queue, Field) {
                     notChecked.pushBack(newField);
                 }
             }
+			//stepsCounter += 1;
         }
+		//alert(counter);
     };
 
     return Maze;
